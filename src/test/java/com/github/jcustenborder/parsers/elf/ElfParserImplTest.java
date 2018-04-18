@@ -46,6 +46,7 @@ public class ElfParserImplTest {
     this.objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
     this.objectMapper.configure(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS, true);
     this.objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true);
+    this.objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
   }
 
   @TestFactory

@@ -50,13 +50,14 @@ public class ElfParserBuilder {
     fieldParsers.put("sc-status", FieldParsers.LONG);
     fieldParsers.put("sc-bytes", FieldParsers.LONG);
     fieldParsers.put("cs-bytes", FieldParsers.LONG);
-    fieldParsers.put("cs-bytes", FieldParsers.LONG);
+    fieldParsers.put("cs-uri-port", FieldParsers.INT);
 
     DEFAULT_PARSERS = Collections.unmodifiableMap(fieldParsers);
   }
 
   final Map<String, FieldParser> fieldParsers = new LinkedHashMap<>();
   Matcher headerMatcher = HEADER_PATTERN.matcher("");
+
   private ElfParserBuilder() {
 
   }
