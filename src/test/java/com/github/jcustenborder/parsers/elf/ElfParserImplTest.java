@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -55,19 +56,20 @@ public class ElfParserImplTest {
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".json")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
           ElfParserTestCase testCase = objectMapper.readValue(inputFile, ElfParserTestCase.class);
-          ElfParser parser = ElfParserBuilder.of().build(new StringReader(testCase.input));
+          try (ElfParser parser = ElfParserBuilder.of().build(new StringReader(testCase.input))) {
 
-          List<LogEntry> actual = new ArrayList<>();
-          LogEntry entry;
-          while (null != (entry = parser.next())) {
-            actual.add(entry);
-          }
-          assertEquals(testCase.expected.size(), actual.size());
-          for (int i = 0; i < testCase.expected.size(); i++) {
-            final LogEntry actualEntry = actual.get(i);
-            final LogEntry expectedEntry = clean(testCase.expected, i);
+            List<LogEntry> actual = new ArrayList<>();
+            LogEntry entry;
+            while (null != (entry = parser.next())) {
+              actual.add(entry);
+            }
+            assertEquals(testCase.expected.size(), actual.size());
+            for (int i = 0; i < testCase.expected.size(); i++) {
+              final LogEntry actualEntry = actual.get(i);
+              final LogEntry expectedEntry = clean(testCase.expected, i);
 
-            assertEquals(expectedEntry, actualEntry);
+              assertEquals(expectedEntry, actualEntry);
+            }
           }
         }));
   }
@@ -89,22 +91,24 @@ public class ElfParserImplTest {
   }
 
 
+  @Disabled
   @TestFactory
   public Stream<DynamicTest> convert() {
     File inputRoot = new File("src/test/resources/com/github/jcustenborder/parsers/elf/");
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".log")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
-          ElfParser parser = ElfParserBuilder.of().build(inputFile);
-          ElfParserTestCase testCase = new ElfParserTestCase();
-          testCase.expected = new ArrayList<>();
-          LogEntry entry;
-          while (null != (entry = parser.next())) {
-            testCase.expected.add(entry);
-          }
-          testCase.input = new String(Files.readAllBytes(inputFile.toPath()), "UTF-8");
+          try (ElfParser parser = ElfParserBuilder.of().build(inputFile)) {
+            ElfParserTestCase testCase = new ElfParserTestCase();
+            testCase.expected = new ArrayList<>();
+            LogEntry entry;
+            while (null != (entry = parser.next())) {
+              testCase.expected.add(entry);
+            }
+            testCase.input = new String(Files.readAllBytes(inputFile.toPath()), "UTF-8");
 
-          File outputFile = new File(inputRoot, inputFile.getName().replaceAll("log$", "json"));
-          objectMapper.writeValue(outputFile, testCase);
+            File outputFile = new File(inputRoot, inputFile.getName().replaceAll("log$", "json"));
+            objectMapper.writeValue(outputFile, testCase);
+          }
         }));
   }
 }
