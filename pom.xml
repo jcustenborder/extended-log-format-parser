@@ -27,11 +27,11 @@
         <version>1.0.0.0</version>
     </parent>
     <groupId>com.github.jcustenborder.parsers</groupId>
-    <artifactId>extended-log-parser</artifactId>
+    <artifactId>extended-log-format</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>extended-log-parser</name>
+    <name>extended-log-format-parser</name>
     <packaging>jar</packaging>
-    <url>https://github.com/jcustenborder/extended-log-parser</url>
+    <url>https://github.com/jcustenborder/extended-log-format-parser</url>
     <inceptionYear>2017</inceptionYear>
     <licenses>
         <license>
@@ -51,13 +51,13 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:https://github.com/jcustenborder/extended-log-parser.git</connection>
-        <developerConnection>scm:git:git@github.com:jcustenborder/extended-log-parser.git</developerConnection>
-        <url>https://github.com/jcustenborder/extended-log-parser</url>
+        <connection>scm:git:https://github.com/jcustenborder/extended-log-format-parser.git</connection>
+        <developerConnection>scm:git:git@github.com:jcustenborder/extended-log-format-parser.git</developerConnection>
+        <url>https://github.com/jcustenborder/extended-log-format-parser</url>
     </scm>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/jcustenborder/extended-log-parser/issues</url>
+        <url>https://github.com/jcustenborder/extended-log-format-parser/issues</url>
     </issueManagement>
     <properties>
         <jackson.version>2.9.5</jackson.version>
