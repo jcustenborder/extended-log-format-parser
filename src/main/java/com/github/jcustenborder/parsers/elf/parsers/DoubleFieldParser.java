@@ -15,11 +15,17 @@
  */
 package com.github.jcustenborder.parsers.elf.parsers;
 
-public class FieldParsers {
-  public static final FieldParser DATE = new DateFieldParser();
-  public static final FieldParser TIME = new TimeFieldParser();
-  public static final FieldParser LONG = new LongFieldParser();
-  public static final FieldParser INT = new IntegerFieldParser();
-  public static final FieldParser DOUBLE = new DoubleFieldParser();
-  public static final FieldParser STRING = new StringFieldParser();
+public class DoubleFieldParser implements FieldParser {
+  DoubleFieldParser() {
+  }
+
+  @Override
+  public Class<?> fieldType() {
+    return Double.class;
+  }
+
+  @Override
+  public Object parse(String input) {
+    return Double.parseDouble(input);
+  }
 }

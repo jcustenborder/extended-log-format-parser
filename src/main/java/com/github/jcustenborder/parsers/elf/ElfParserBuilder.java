@@ -48,7 +48,7 @@ public class ElfParserBuilder {
     Map<String, FieldParser> fieldParsers = new HashMap<>();
     fieldParsers.put("date", FieldParsers.DATE);
     fieldParsers.put("time", FieldParsers.TIME);
-    fieldParsers.put("time-taken", FieldParsers.LONG);
+    fieldParsers.put("time-taken", FieldParsers.DOUBLE);
     fieldParsers.put("sc-status", FieldParsers.LONG);
     fieldParsers.put("sc-bytes", FieldParsers.LONG);
     fieldParsers.put("cs-bytes", FieldParsers.LONG);
