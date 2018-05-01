@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,18 +40,24 @@ class ElfParserImpl implements ElfParser {
   ElfParserImpl(LineNumberReader lineReader, List<ParserEntry> fieldParsers) {
     this.lineReader = lineReader;
     this.fieldParsers = fieldParsers;
-    this.fieldTypes = this.fieldParsers
+
+    Map<String, Class<?>> fieldTypes = this.fieldParsers
         .stream()
         .collect(Collectors.toMap(
             p -> p.fieldName,
             p -> p.parser.fieldType())
         );
-
+    this.fieldTypes = Collections.unmodifiableMap(fieldTypes);
     this.parser = new CSVParserBuilder()
         .withQuoteChar('"')
         .withSeparator(' ')
         .withFieldAsNull(CSVReaderNullFieldIndicator.NEITHER)
         .build();
+  }
+
+  @Override
+  public Map<String, Class<?>> fieldTypes() {
+    return this.fieldTypes;
   }
 
   public LogEntry next() throws IOException {
@@ -92,7 +99,7 @@ class ElfParserImpl implements ElfParser {
 
 
   @Override
-  public void close() throws Exception {
+  public void close() throws IOException {
     this.lineReader.close();
   }
 }

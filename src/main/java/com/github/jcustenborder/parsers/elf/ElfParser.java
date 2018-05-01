@@ -15,8 +15,21 @@
  */
 package com.github.jcustenborder.parsers.elf;
 
+import java.io.Closeable;
 import java.io.IOException;
+import java.util.Map;
 
-public interface ElfParser extends AutoCloseable {
+public interface ElfParser extends Closeable {
+  /**
+   * The data types associated with the fields.
+   * @return
+   */
+  Map<String, Class<?>> fieldTypes();
+
+  /**
+   * Method used to return the next LogEntry.
+   * @return LogEntry if one is available. Null if at the end of the file.
+   * @throws IOException
+   */
   LogEntry next() throws IOException;
 }
