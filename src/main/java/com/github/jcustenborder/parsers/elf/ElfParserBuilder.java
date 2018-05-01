@@ -17,6 +17,8 @@ package com.github.jcustenborder.parsers.elf;
 
 import com.github.jcustenborder.parsers.elf.parsers.FieldParser;
 import com.github.jcustenborder.parsers.elf.parsers.FieldParsers;
+import com.opencsv.CSVParserBuilder;
+import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +59,27 @@ public class ElfParserBuilder {
 
   final Map<String, FieldParser> fieldParsers = new LinkedHashMap<>();
   Matcher headerMatcher = HEADER_PATTERN.matcher("");
+
+  private char separator = '\t';
+  private char quoteChar = '"';
+
+  public char separator() {
+    return this.separator;
+  }
+
+  public ElfParserBuilder separator(char separator) {
+    this.separator = separator;
+    return this;
+  }
+
+  public char quoteChar() {
+    return this.quoteChar;
+  }
+
+  public ElfParserBuilder quoteChar(char quoteChar) {
+    this.quoteChar = quoteChar;
+    return this;
+  }
 
   private ElfParserBuilder() {
 
@@ -109,7 +132,13 @@ public class ElfParserBuilder {
 
       parsers.add(ParserEntry.of(fieldName, parser));
     }
-    return new ElfParserImpl(lineNumberReader, parsers);
+
+    CSVParserBuilder parserBuilder = new CSVParserBuilder()
+        .withQuoteChar(this.quoteChar)
+        .withSeparator(this.separator)
+        .withFieldAsNull(CSVReaderNullFieldIndicator.NEITHER);
+
+    return new ElfParserImpl(parserBuilder, lineNumberReader, parsers);
   }
 
   public ElfParser build(InputStream inputStream) throws IOException {

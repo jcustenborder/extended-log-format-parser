@@ -17,7 +17,6 @@ package com.github.jcustenborder.parsers.elf;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVParserBuilder;
-import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ class ElfParserImpl implements ElfParser {
   private final Map<String, Class<?>> fieldTypes;
   private final CSVParser parser;
 
-  ElfParserImpl(LineNumberReader lineReader, List<ParserEntry> fieldParsers) {
+  ElfParserImpl(CSVParserBuilder parserBuilder, LineNumberReader lineReader, List<ParserEntry> fieldParsers) {
     this.lineReader = lineReader;
     this.fieldParsers = fieldParsers;
 
@@ -48,11 +47,8 @@ class ElfParserImpl implements ElfParser {
             p -> p.parser.fieldType())
         );
     this.fieldTypes = Collections.unmodifiableMap(fieldTypes);
-    this.parser = new CSVParserBuilder()
-        .withQuoteChar('"')
-        .withSeparator(' ')
-        .withFieldAsNull(CSVReaderNullFieldIndicator.NEITHER)
-        .build();
+    this.parser = parserBuilder.build();
+
   }
 
   @Override

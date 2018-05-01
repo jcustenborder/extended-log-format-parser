@@ -56,7 +56,9 @@ public class ElfParserImplTest {
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".json")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
           ElfParserTestCase testCase = objectMapper.readValue(inputFile, ElfParserTestCase.class);
-          try (ElfParser parser = ElfParserBuilder.of().build(new StringReader(testCase.input))) {
+          try (ElfParser parser = ElfParserBuilder.of()
+              .separator(' ')
+              .build(new StringReader(testCase.input))) {
 
             List<LogEntry> actual = new ArrayList<>();
             LogEntry entry;
@@ -97,7 +99,9 @@ public class ElfParserImplTest {
     File inputRoot = new File("src/test/resources/com/github/jcustenborder/parsers/elf/");
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".log")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
-          try (ElfParser parser = ElfParserBuilder.of().build(inputFile)) {
+          try (ElfParser parser = ElfParserBuilder.of()
+              .separator(' ')
+              .build(inputFile)) {
             ElfParserTestCase testCase = new ElfParserTestCase();
             testCase.expected = new ArrayList<>();
             LogEntry entry;
