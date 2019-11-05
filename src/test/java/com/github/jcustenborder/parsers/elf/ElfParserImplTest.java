@@ -18,12 +18,17 @@ package com.github.jcustenborder.parsers.elf;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.github.jcustenborder.parsers.elf.parsers.FieldParsers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -34,6 +39,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 public class ElfParserImplTest {
@@ -92,10 +98,46 @@ public class ElfParserImplTest {
         .build();
   }
 
+  @Test
+  public void parserEntriesMustBeUnique() {
+    List<ParserEntry> parserEntries = Arrays.asList(
+        ImmutableParserEntry.builder()
+            .fieldName("foo")
+            .parser(FieldParsers.STRING)
+            .build(),
+        ImmutableParserEntry.builder()
+            .fieldName("foo")
+            .parser(FieldParsers.STRING)
+            .build(),
+        ImmutableParserEntry.builder()
+            .fieldName("bar")
+            .parser(FieldParsers.STRING)
+            .build(),
+        ImmutableParserEntry.builder()
+            .fieldName("baz")
+            .parser(FieldParsers.STRING)
+            .build(),
+        ImmutableParserEntry.builder()
+            .fieldName("baz")
+            .parser(FieldParsers.STRING)
+            .build()
+    );
+
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+      try (ByteArrayInputStream inputStream = new ByteArrayInputStream(new byte[100])) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream)) {
+          ElfParserImpl elfParser = new ElfParserImpl(new LineNumberReader(reader), parserEntries);
+        }
+      }
+    });
+    assertEquals("Field(s) are defined more than once: baz, foo", exception.getMessage());
+  }
 
   @Disabled
   @TestFactory
   public Stream<DynamicTest> convert() {
+
+
     File inputRoot = new File("src/test/resources/com/github/jcustenborder/parsers/elf/");
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".log")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {

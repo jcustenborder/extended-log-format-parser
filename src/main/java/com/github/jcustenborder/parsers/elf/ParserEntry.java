@@ -16,16 +16,19 @@
 package com.github.jcustenborder.parsers.elf;
 
 import com.github.jcustenborder.parsers.elf.parsers.FieldParser;
+import org.immutables.value.Value;
 
-class ParserEntry {
-  public final String fieldName;
-  public final FieldParser parser;
-  private ParserEntry(String fieldName, FieldParser parser) {
-    this.fieldName = fieldName;
-    this.parser = parser;
-  }
+@Value.Immutable
+interface ParserEntry {
+  /**
+   * Name of the field
+   * @return Name of the field
+   */
+  String fieldName();
 
-  public static final ParserEntry of(String fieldName, FieldParser parser) {
-    return new ParserEntry(fieldName, parser);
-  }
+  /**
+   * Parser for the field
+   * @return Parser for the field
+   */
+  FieldParser parser();
 }

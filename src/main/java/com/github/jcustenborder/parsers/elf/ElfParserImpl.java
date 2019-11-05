@@ -15,8 +15,6 @@
  */
 package com.github.jcustenborder.parsers.elf;
 
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +24,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class ElfParserImpl implements ElfParser {
@@ -34,21 +34,37 @@ class ElfParserImpl implements ElfParser {
   private final LineNumberReader lineReader;
   private final List<ParserEntry> fieldParsers;
   private final Map<String, Class<?>> fieldTypes;
-  private final CSVParser parser;
 
-  ElfParserImpl(CSVParserBuilder parserBuilder, LineNumberReader lineReader, List<ParserEntry> fieldParsers) {
+  ElfParserImpl(LineNumberReader lineReader, List<ParserEntry> fieldParsers) {
     this.lineReader = lineReader;
     this.fieldParsers = fieldParsers;
 
+    List<String> duplicateFields = this.fieldParsers.stream()
+        .collect(Collectors.groupingBy(ParserEntry::fieldName))
+        .entrySet().stream()
+        .filter(e -> e.getValue().size() > 1)
+        .map(Map.Entry::getKey)
+        .sorted()
+        .collect(Collectors.toList());
+
+    if (!duplicateFields.isEmpty()) {
+      String fieldNames = String.join(", ", duplicateFields);
+      throw new IllegalStateException(
+          String.format("Field(s) are defined more than once: %s", fieldNames)
+      );
+    }
+
     Map<String, Class<?>> fieldTypes = this.fieldParsers
         .stream()
-        .collect(Collectors.toMap(
-            p -> p.fieldName,
-            p -> p.parser.fieldType())
+        .collect(
+            Collectors.toMap(
+                ParserEntry::fieldName,
+                p -> p.parser().fieldType(),
+                (e1, e2) -> e1,
+                LinkedHashMap::new
+            )
         );
     this.fieldTypes = Collections.unmodifiableMap(fieldTypes);
-    this.parser = parserBuilder.build();
-
   }
 
   @Override
@@ -56,38 +72,74 @@ class ElfParserImpl implements ElfParser {
     return this.fieldTypes;
   }
 
-  public LogEntry next() throws IOException {
+  static final Pattern SPLITTER = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
 
+  public LogEntry next() throws IOException {
     String line;
     while (null != (line = this.lineReader.readLine())) {
+      final int lineNumber = this.lineReader.getLineNumber();
       if (line.startsWith("#")) {
-        log.trace("next() - Skipping line. Starts with #.");
+        log.trace("next() - Skipping line {}. Starts with #.", lineNumber);
         continue;
       }
-      log.trace("next() - Processing line '{}'", line);
-      String[] unparsedData = this.parser.parseLine(line);
+      log.trace("next() - Processing line {}: '{}'", lineNumber, line);
+      Matcher lineMatcher = SPLITTER.matcher(line);
+      int fieldIndex = 0;
+
       Map<String, Object> data = new LinkedHashMap<>(this.fieldParsers.size());
-      for (int i = 0; i < this.fieldParsers.size(); i++) {
-        ParserEntry entry = this.fieldParsers.get(i);
-        log.trace("next() - Converting field('{}') to {}", entry.fieldName, entry.parser.fieldType());
-        String input = unparsedData[i];
-
-        final Object value;
-
-        if (NULL_INDICATOR.equals(input)) {
-          value = null;
-        } else {
-          value = entry.parser.parse(input);
+      while (lineMatcher.find()) {
+        final ParserEntry entry;
+        try {
+          entry = this.fieldParsers.get(fieldIndex);
+        } catch (IndexOutOfBoundsException ex) {
+          throw new IllegalStateException(
+              String.format(
+                  "Line %s has more field(s) than specified in the header. fieldIndex = %s",
+                  lineNumber,
+                  fieldIndex
+              ),
+              ex
+          );
         }
 
-        data.put(entry.fieldName, value);
+        String input = lineMatcher.group(0);
+        if (input.startsWith("\"") && input.endsWith("\"")) {
+          input = input.replaceAll("^\"|\"$", "");
+        }
+        log.trace(
+            "next() - Processing line {} field({}) fieldIndex {}: '{}'",
+            lineNumber,
+            entry.fieldName(),
+            fieldIndex,
+            input
+        );
+        final Object fieldValue;
+
+        if (NULL_INDICATOR.equals(input)) {
+          fieldValue = null;
+        } else {
+          try {
+            fieldValue = entry.parser().parse(input);
+          } catch (Exception ex) {
+            throw new IOException(
+                String.format(
+                    "Could not parse line %s fieldIndex %s input = '%s'",
+                    lineNumber,
+                    fieldIndex,
+                    input
+                ),
+                ex
+            );
+          }
+        }
+        data.put(entry.fieldName(), fieldValue);
+        fieldIndex++;
       }
 
       return com.github.jcustenborder.parsers.elf.ImmutableLogEntry.builder()
           .fieldData(data)
           .fieldTypes(this.fieldTypes)
           .build();
-
     }
 
     return null;

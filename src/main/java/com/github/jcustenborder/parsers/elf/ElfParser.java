@@ -22,14 +22,14 @@ import java.util.Map;
 public interface ElfParser extends Closeable {
   /**
    * The data types associated with the fields.
-   * @return
+   * @return The data types associated with the fields.
    */
   Map<String, Class<?>> fieldTypes();
 
   /**
    * Method used to return the next LogEntry.
    * @return LogEntry if one is available. Null if at the end of the file.
-   * @throws IOException
+   * @throws IOException Exception thrown when data cannot be parsed or there is an underlying system error.
    */
   LogEntry next() throws IOException;
 }
