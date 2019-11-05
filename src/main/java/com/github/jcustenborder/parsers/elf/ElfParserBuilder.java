@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,6 @@ package com.github.jcustenborder.parsers.elf;
 
 import com.github.jcustenborder.parsers.elf.parsers.FieldParser;
 import com.github.jcustenborder.parsers.elf.parsers.FieldParsers;
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.enums.CSVReaderNullFieldIndicator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +51,9 @@ public class ElfParserBuilder {
     fieldParsers.put("sc-bytes", FieldParsers.LONG);
     fieldParsers.put("cs-bytes", FieldParsers.LONG);
     fieldParsers.put("cs-uri-port", FieldParsers.INT);
+//    fieldParsers.put("bytes", FieldParsers.LONG);
+    fieldParsers.put("bytes1", FieldParsers.LONG);
+    fieldParsers.put("bytes2", FieldParsers.LONG);
 
     DEFAULT_PARSERS = Collections.unmodifiableMap(fieldParsers);
   }
@@ -112,33 +113,39 @@ public class ElfParserBuilder {
 
     if (fieldNames.isEmpty()) {
       throw new IllegalStateException(
-          String.format("No Fields found after reading {} line(s)", lineNumberReader.getLineNumber())
+          String.format("No Fields found after reading %s line(s)", lineNumberReader.getLineNumber())
       );
     }
     log.trace("build() - Found {} field(s). {}", fieldNames.size(), fieldNames);
 
     List<ParserEntry> parsers = new ArrayList<>();
+
     for (String fieldName : fieldNames) {
       log.trace("build() - Determining parser for field({}).", fieldName);
       FieldParser parser = this.fieldParsers.computeIfAbsent(fieldName, s -> {
         log.trace("build() - No definition for {}. Checking defaults", fieldName);
-        FieldParser p = DEFAULT_PARSERS.get(fieldName);
-        if (null != p) {
-          return p;
+        FieldParser result = DEFAULT_PARSERS.get(fieldName);
+        if (null == result) {
+          result = FieldParsers.STRING;
         }
-
-        return FieldParsers.STRING;
+        return result;
       });
-
-      parsers.add(ParserEntry.of(fieldName, parser));
+      ParserEntry parserEntry = ImmutableParserEntry.builder()
+          .fieldName(fieldName)
+          .parser(parser)
+          .build();
+      parsers.add(parserEntry);
+    }
+    if (log.isTraceEnabled()) {
+      int index = 0;
+      for (ParserEntry parserEntry : parsers) {
+        log.trace("build() - Defined field index {} as {}", index, parserEntry);
+        index++;
+      }
     }
 
-    CSVParserBuilder parserBuilder = new CSVParserBuilder()
-        .withQuoteChar(this.quoteChar)
-        .withSeparator(this.separator)
-        .withFieldAsNull(CSVReaderNullFieldIndicator.NEITHER);
 
-    return new ElfParserImpl(parserBuilder, lineNumberReader, parsers);
+    return new ElfParserImpl(lineNumberReader, parsers);
   }
 
   public ElfParser build(InputStream inputStream) throws IOException {

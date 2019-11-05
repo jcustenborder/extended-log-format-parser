@@ -27,13 +27,13 @@ import java.util.Map;
 public interface LogEntry {
   /**
    * Map containing the field name to java type for the classes.
-   * @return
+   * @return Map containing the field name to java type for the classes.
    */
   Map<String, Class<?>> fieldTypes();
 
   /**
    * Map containing the field data.
-   * @return
+   * @return Map containing the field name to java type for the classes.
    */
   @AllowNulls
   Map<String, Object> fieldData();
