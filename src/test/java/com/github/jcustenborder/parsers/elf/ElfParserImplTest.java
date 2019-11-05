@@ -63,7 +63,6 @@ public class ElfParserImplTest {
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
           ElfParserTestCase testCase = objectMapper.readValue(inputFile, ElfParserTestCase.class);
           try (ElfParser parser = ElfParserBuilder.of()
-              .separator(' ')
               .build(new StringReader(testCase.input))) {
 
             List<LogEntry> actual = new ArrayList<>();
@@ -71,6 +70,7 @@ public class ElfParserImplTest {
             while (null != (entry = parser.next())) {
               actual.add(entry);
             }
+
             assertEquals(testCase.expected.size(), actual.size());
             for (int i = 0; i < testCase.expected.size(); i++) {
               final LogEntry actualEntry = actual.get(i);
@@ -142,7 +142,6 @@ public class ElfParserImplTest {
     return Arrays.stream(inputRoot.listFiles(f -> f.getName().endsWith(".log")))
         .map(inputFile -> dynamicTest(inputFile.getName(), () -> {
           try (ElfParser parser = ElfParserBuilder.of()
-              .separator(' ')
               .build(inputFile)) {
             ElfParserTestCase testCase = new ElfParserTestCase();
             testCase.expected = new ArrayList<>();
