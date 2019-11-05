@@ -10,6 +10,21 @@
     },
     "fieldData" : {
       "c-ip" : "1.1.1.1",
+      "cs-method" : "[2]USER",
+      "cs-uri-stem" : "anonymous",
+      "sc-status" : 331,
+      "time" : [ 16, 44, 49 ]
+    }
+  }, {
+    "fieldTypes" : {
+      "c-ip" : "java.lang.String",
+      "cs-method" : "java.lang.String",
+      "cs-uri-stem" : "java.lang.String",
+      "sc-status" : "java.lang.Long",
+      "time" : "java.time.LocalTime"
+    },
+    "fieldData" : {
+      "c-ip" : "1.1.1.1",
       "cs-method" : "[2]PASS",
       "cs-uri-stem" : null,
       "sc-status" : 230,

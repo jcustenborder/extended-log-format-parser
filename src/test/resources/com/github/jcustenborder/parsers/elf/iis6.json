@@ -19,6 +19,26 @@
       "time" : "java.time.LocalTime",
       "time-taken" : "java.lang.Double"
     },
+    "fieldData" : { }
+  }, {
+    "fieldTypes" : {
+      "c-ip" : "java.lang.String",
+      "cs(Cookie)" : "java.lang.String",
+      "cs(Referrer)" : "java.lang.String",
+      "cs(User-Agent)" : "java.lang.String",
+      "cs-bytes" : "java.lang.Long",
+      "cs-method" : "java.lang.String",
+      "cs-uri-query" : "java.lang.String",
+      "cs-uri-stem" : "java.lang.String",
+      "cs-username" : "java.lang.String",
+      "cs-version" : "java.lang.String",
+      "date" : "java.time.LocalDate",
+      "s-ip" : "java.lang.String",
+      "sc-bytes" : "java.lang.Long",
+      "sc-status" : "java.lang.Long",
+      "time" : "java.time.LocalTime",
+      "time-taken" : "java.lang.Double"
+    },
     "fieldData" : {
       "c-ip" : "206.175.82.5",
       "cs(Cookie)" : "USERID=CustomerA;+IMPID=01234",

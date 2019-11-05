@@ -61,27 +61,6 @@ public class ElfParserBuilder {
   final Map<String, FieldParser> fieldParsers = new LinkedHashMap<>();
   Matcher headerMatcher = HEADER_PATTERN.matcher("");
 
-  private char separator = '\t';
-  private char quoteChar = '"';
-
-  public char separator() {
-    return this.separator;
-  }
-
-  public ElfParserBuilder separator(char separator) {
-    this.separator = separator;
-    return this;
-  }
-
-  public char quoteChar() {
-    return this.quoteChar;
-  }
-
-  public ElfParserBuilder quoteChar(char quoteChar) {
-    this.quoteChar = quoteChar;
-    return this;
-  }
-
   private ElfParserBuilder() {
 
   }
@@ -109,6 +88,7 @@ public class ElfParserBuilder {
         String[] fields = headerValue.split("\\s+");
         Collections.addAll(fieldNames, fields);
       }
+      lineNumberReader.mark(128 * 1024);
     }
 
     if (fieldNames.isEmpty()) {
@@ -117,7 +97,7 @@ public class ElfParserBuilder {
       );
     }
     log.trace("build() - Found {} field(s). {}", fieldNames.size(), fieldNames);
-
+    lineNumberReader.reset();
     List<ParserEntry> parsers = new ArrayList<>();
 
     for (String fieldName : fieldNames) {
